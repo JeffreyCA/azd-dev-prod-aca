@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: dev-prod-aca
+services:
+  dev-prod-aca:
+    project: .
+    host: containerapp
+    language: python
+    apiVersion: '2025-02-02-preview'
+  
