@@ -11,17 +11,11 @@
       "envType": {
         "value": "${AZURE_ENV_TYPE=dev}"
       },
-      "devProdPcAcaExists": {
-        "value": "${SERVICE_DEV_PROD_PC_ACA_RESOURCE_EXISTS=false}"
-      },
       "customDomain": {
         "value": "${CUSTOM_DOMAIN_NAME}"
       },
-      "managedCertId": {
-        "value": "${MANAGED_CERT_ID}"
-      },
       "containerAppsEnvironmentResourceId": {
-        "value": "${LAYER_1_CONTAINER_APP_ENVIRONMENT_ID}"
+        "value": "${CONTAINER_APP_ENVIRONMENT_ID}"
       }
     }
 }

@@ -48,10 +48,10 @@ param storageAccountName string
 param storageAccountBlobEndpoint string
 
 @description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool
+param devProdAcaExists bool
 
 @description('Custom domain name for the container app')
-param customDomain string
+param customDomain string?
 
 @description('Resource ID of the managed certificate')
 param managedCertId string?
@@ -89,17 +89,17 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.4.5
 }
 
 // Fetch existing container image if app already exists
-module devProdPcAcaFetchLatestImage './modules/fetch-container-image.bicep' = {
-  name: 'devProdPcAca-fetch-image'
+module devProdAcaFetchLatestImage './modules/fetch-container-image.bicep' = {
+  name: 'devProdAca-fetch-image'
   params: {
-    exists: devProdPcAcaExists
+    exists: devProdAcaExists
     name: 'dev-prod-aca'
   }
 }
 
 // Container app with managed identity integration
-module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
-  name: 'devProdPcAca'
+module devProdAca 'br/public:avm/res/app/container-app:0.18.1' = {
+  name: 'devProdAca'
   params: {
     name: 'dev-prod-aca'
     ingressTargetPort: 5000
@@ -109,7 +109,7 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
     }
     containers: [
       {
-        image: devProdPcAcaFetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        image: devProdAcaFetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         name: 'main'
         resources: {
           cpu: json('0.5')
@@ -139,7 +139,7 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
         ]
       }
     ]
-    customDomains: [
+    customDomains: empty(customDomain) ? [] : [
       {
         name: customDomain
         certificateId: managedCertId
@@ -168,7 +168,7 @@ param logAnalyticsWorkspaceResourceId string
 
 // Outputs for use by other modules
 @description('Container App resource ID')
-output containerAppResourceId string = devProdPcAca.outputs.resourceId
+output containerAppResourceId string = devProdAca.outputs.resourceId
 
 @description('Container Registry endpoint')
 output containerRegistryEndpoint string = containerRegistry.outputs.loginServer
@@ -177,7 +177,7 @@ output containerRegistryEndpoint string = containerRegistry.outputs.loginServer
 output containerAppsEnvironmentResourceId string = containerAppsEnvironment.outputs.resourceId
 
 @description('Container App name')
-output containerAppName string = devProdPcAca.outputs.name
+output containerAppName string = devProdAca.outputs.name
 
 @description('Container App hostname')
-output containerAppHostname string = devProdPcAca.outputs.fqdn
+output containerAppHostname string = devProdAca.outputs.fqdn

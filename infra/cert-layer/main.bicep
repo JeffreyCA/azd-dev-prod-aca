@@ -51,8 +51,4 @@ module cert '../resources/cert.bicep' = {
 }
 
 // Outputs from cert module
-output LAYER_2_MANAGED_CERTIFICATE_ID string = cert.outputs.managedCertificateId
-output LAYER_2_MANAGED_CERTIFICATE_NAME string = cert.outputs.managedCertificateName
-output LAYER_2_CUSTOM_DOMAIN_NAME string = cert.outputs.customDomainName
-output LAYER_2_CERTIFICATE_CREATED bool = cert.outputs.certificateCreated
-output LAYER_2_DOMAIN_VALIDATION_INSTRUCTIONS string = cert.outputs.domainValidationInstructions
+output MANAGED_CERTIFICATE_ID string = cert.outputs.managedCertificateId

@@ -8,26 +8,17 @@ services:
     apiVersion: 2025-02-02-preview
 infra:
   layers:
-  - name: layer1
-    path: ./infra/layer-1
-  - name: layer2
-    path: ./infra/layer-2
-  - name: layer3
-    path: ./infra/layer-3
+  - name: cert-layer
+    path: ./infra/cert-layer
 workflows:
   up:
    steps:
-    - azd: provision layer1
-    - azd: provision layer2
-    - azd: provision layer3
+    - azd: provision
+    - azd: provision cert-layer
+    - azd: provision
     - azd: deploy
 hooks:
   preprovision:
     shell: sh
-    run: |
-      if [ -n "$LAYER_1_CONTAINER_APP_HOSTNAME" ] && [ -z "$LAYER_2_MANAGED_CERTIFICATE_ID" ]; then
-        echo "Configure CNAME or A record on '$CUSTOM_DOMAIN' to: '$LAYER_1_CONTAINER_APP_HOSTNAME'"
-        echo "Press enter once completed..."
-        read dummy
-      fi
+    run: ./preprovision.sh
     interactive: true

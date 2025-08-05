@@ -14,13 +14,13 @@ param location string
 param envType string = 'dev'
 
 @description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool = false
+param devProdAcaExists bool = false
 
 @description('Custom domain name for the container app')
 param customDomain string
 
-// @description('Resource ID of the managed certificate')
-// param managedCertId string
+@description('Resource ID of the managed certificate')
+param managedCertId string?
 
 // The principal parameters are available for role assignments if needed in the future
 // Currently, the application uses managed identity for secure access
@@ -42,11 +42,11 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-var abbrs = loadJsonContent('../abbreviations.json')
+var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = uniqueString(subscription().id, rg.id, location)
 
 // Deploy network infrastructure only for production environments
-module network '../resources/network.bicep' = if (envType == 'prod') {
+module network './resources/network.bicep' = if (envType == 'prod') {
   scope: rg
   name: 'networkDeployment'
   params: {
@@ -58,7 +58,7 @@ module network '../resources/network.bicep' = if (envType == 'prod') {
 }
 
 // Monitor application with Azure Monitor
-module monitoring '../resources/monitoring.bicep' = {
+module monitoring './resources/monitoring.bicep' = {
   scope: rg
   name: 'monitoringDeployment'
   params: {
@@ -80,7 +80,7 @@ module appIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.
 }
 
 // Shared services including storage account with environment-specific connectivity
-module shared '../resources/shared.bicep' = {
+module shared './resources/shared.bicep' = {
   scope: rg
   name: 'sharedDeployment'
   params: {
@@ -96,7 +96,7 @@ module shared '../resources/shared.bicep' = {
 }
 
 // Application hosting infrastructure
-module app '../resources/app.bicep' = {
+module app './resources/app.bicep' = {
   scope: rg
   name: 'appDeployment'
   params: {
@@ -113,28 +113,13 @@ module app '../resources/app.bicep' = {
     appIdentityPrincipalId: appIdentity.outputs.principalId
     storageAccountName: shared.outputs.storageAccountName
     storageAccountBlobEndpoint: shared.outputs.storageAccountBlobEndpoint
-    devProdPcAcaExists: devProdPcAcaExists
+    devProdAcaExists: devProdAcaExists
     customDomain: customDomain
-    managedCertId: null
+    managedCertId: managedCertId
   }
 }
 
-// Variables for outputs to handle conditional modules
-var networkSubnetId = envType == 'prod' ? network.outputs.containerAppSubnetId : ''
-
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = app.outputs.containerRegistryEndpoint
-output AZURE_RESOURCE_DEV_PROD_PC_ACA_ID string = app.outputs.containerAppResourceId
-
-// Additional outputs for use by subsequent layers
-output LAYER_1_CONTAINER_APP_SUBNET_ID string = networkSubnetId
-output LAYER_1_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID string = monitoring.outputs.logAnalyticsWorkspaceResourceId
-output LAYER_1_APPLICATION_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-output LAYER_1_APP_IDENTITY_RESOURCE_ID string = appIdentity.outputs.resourceId
-output LAYER_1_APP_IDENTITY_CLIENT_ID string = appIdentity.outputs.clientId
-output LAYER_1_APP_IDENTITY_PRINCIPAL_ID string = appIdentity.outputs.principalId
-output LAYER_1_STORAGE_ACCOUNT_NAME string = shared.outputs.storageAccountName
-output LAYER_1_STORAGE_ACCOUNT_BLOB_ENDPOINT string = shared.outputs.storageAccountBlobEndpoint
-
-output LAYER_1_CONTAINER_APP_ENVIRONMENT_ID string = app.outputs.containerAppsEnvironmentResourceId
-output LAYER_1_CONTAINER_APP_HOSTNAME string = app.outputs.containerAppHostname
+output CONTAINER_APP_ENVIRONMENT_ID string = app.outputs.containerAppsEnvironmentResourceId
+output CONTAINER_APP_HOSTNAME string = app.outputs.containerAppHostname
 output CUSTOM_DOMAIN string = customDomain
