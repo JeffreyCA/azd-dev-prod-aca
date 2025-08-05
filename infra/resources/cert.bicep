@@ -5,27 +5,6 @@
 // - Managed certificate creation for custom domains
 // - Automatic certificate management and renewal
 // - Integration with Container Apps environments
-//
-// Usage Example:
-// module certificate './cert.bicep' = {
-//   name: 'certificateDeployment'
-//   params: {
-//     location: location
-//     tags: tags
-//     containerAppsEnvironmentResourceId: containerAppsEnvironment.outputs.resourceId
-//     customDomain: 'app.contoso.com'
-//     createManagedCert: !empty('app.contoso.com')
-//   }
-// }
-//
-// Then pass the certificate ID to the app module:
-// module app './app.bicep' = {
-//   params: {
-//     // other parameters...
-//     customDomain: 'app.contoso.com'
-//     managedCertId: certificate.outputs.managedCertificateId
-//   }
-// }
 
 @description('The location used for all deployed resources')
 param location string
@@ -67,12 +46,3 @@ output managedCertificateId string = createManagedCert ? managedCertificate.id :
 
 @description('Managed certificate name')
 output managedCertificateName string = createManagedCert ? managedCertificate.name : ''
-
-@description('Custom domain name')
-output customDomainName string = customDomain
-
-@description('Whether the certificate was created')
-output certificateCreated bool = createManagedCert
-
-@description('Instructions for domain validation')
-output domainValidationInstructions string = createManagedCert ? 'Create a CNAME record for domain validation. Check the Azure portal for specific validation requirements.' : 'No certificate created - custom domain was empty'
