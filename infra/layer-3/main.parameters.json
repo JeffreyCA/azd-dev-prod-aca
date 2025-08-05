@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "environmentName": {
+        "value": "${AZURE_ENV_NAME}"
+      },
+      "location": {
+        "value": "${AZURE_LOCATION}"
+      },
+      "envType": {
+        "value": "${AZURE_ENV_TYPE=dev}"
+      },
+      "devProdPcAcaExists": {
+        "value": "${SERVICE_DEV_PROD_PC_ACA_RESOURCE_EXISTS=false}"
+      },
+      "customDomain": {
+        "value": "${CUSTOM_DOMAIN_NAME}"
+      },
+      "containerAppSubnetId": {
+        "value": "${LAYER_1_CONTAINER_APP_SUBNET_ID}"
+      },
+      "logAnalyticsWorkspaceResourceId": {
+        "value": "${LAYER_1_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID}"
+      },
+      "applicationInsightsConnectionString": {
+        "value": "${LAYER_1_APPLICATION_INSIGHTS_CONNECTION_STRING}"
+      },
+      "appIdentityResourceId": {
+        "value": "${LAYER_1_APP_IDENTITY_RESOURCE_ID}"
+      },
+      "appIdentityClientId": {
+        "value": "${LAYER_1_APP_IDENTITY_CLIENT_ID}"
+      },
+      "appIdentityPrincipalId": {
+        "value": "${LAYER_1_APP_IDENTITY_PRINCIPAL_ID}"
+      },
+      "storageAccountName": {
+        "value": "${LAYER_1_STORAGE_ACCOUNT_NAME}"
+      },
+      "storageAccountBlobEndpoint": {
+        "value": "${LAYER_1_STORAGE_ACCOUNT_BLOB_ENDPOINT}"
+      },
+      "managedCertId": {
+        "value": "${LAYER_2_MANAGED_CERTIFICATE_ID}"
+      }
+    }
+}

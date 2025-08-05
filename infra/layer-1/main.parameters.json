@@ -16,9 +16,6 @@
       },
       "customDomain": {
         "value": "${CUSTOM_DOMAIN_NAME}"
-      },
-      "managedCertId": {
-        "value": "${MANAGED_CERT_ID}"
       }
     }
 }

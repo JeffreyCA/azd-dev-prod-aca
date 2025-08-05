@@ -13,14 +13,10 @@ param location string
 @allowed(['dev', 'test', 'prod'])
 param envType string = 'dev'
 
-@description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool = false
+param containerAppsEnvironmentResourceId string
 
 @description('Custom domain name for the container app')
 param customDomain string
-
-@description('Resource ID of the managed certificate')
-param managedCertId string
 
 // The principal parameters are available for role assignments if needed in the future
 // Currently, the application uses managed identity for secure access
@@ -42,17 +38,21 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module resources 'resources.bicep' = {
+// Application hosting infrastructure
+module cert '../resources/cert.bicep' = {
   scope: rg
-  name: 'resources'
+  name: 'managedCert'
   params: {
     location: location
     tags: tags
-    envType: envType
-    devProdPcAcaExists: devProdPcAcaExists
+    containerAppsEnvironmentResourceId: containerAppsEnvironmentResourceId
     customDomain: customDomain
-    managedCertId: managedCertId
   }
 }
-output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
-output AZURE_RESOURCE_DEV_PROD_PC_ACA_ID string = resources.outputs.AZURE_RESOURCE_DEV_PROD_PC_ACA_ID
+
+// Outputs from cert module
+output LAYER_2_MANAGED_CERTIFICATE_ID string = cert.outputs.managedCertificateId
+output LAYER_2_MANAGED_CERTIFICATE_NAME string = cert.outputs.managedCertificateName
+output LAYER_2_CUSTOM_DOMAIN_NAME string = cert.outputs.customDomainName
+output LAYER_2_CERTIFICATE_CREATED bool = cert.outputs.certificateCreated
+output LAYER_2_DOMAIN_VALIDATION_INSTRUCTIONS string = cert.outputs.domainValidationInstructions

@@ -1,8 +1,33 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# yaml-language-server: $schema=/workspaces/azure-dev/schemas/alpha/azure.yaml.json
 name: dev-prod-aca
 services:
   dev-prod-aca:
     project: .
-    host: containerapp
     language: python
-    apiVersion: '2025-02-02-preview'
+    host: containerapp
+    apiVersion: 2025-02-02-preview
+infra:
+  layers:
+  - name: layer1
+    path: ./infra/layer-1
+  - name: layer2
+    path: ./infra/layer-2
+  - name: layer3
+    path: ./infra/layer-3
+workflows:
+  up:
+   steps:
+    - azd: provision layer1
+    - azd: provision layer2
+    - azd: provision layer3
+    - azd: deploy
+hooks:
+  preprovision:
+    shell: sh
+    run: |
+      if [ -n "$LAYER_1_CONTAINER_APP_HOSTNAME" ] && [ -z "$LAYER_2_MANAGED_CERTIFICATE_ID" ]; then
+        echo "Configure CNAME or A record on '$CUSTOM_DOMAIN' to: '$LAYER_1_CONTAINER_APP_HOSTNAME'"
+        echo "Press enter once completed..."
+        read dummy
+      fi
+    interactive: true

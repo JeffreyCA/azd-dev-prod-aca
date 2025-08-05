@@ -54,7 +54,7 @@ param devProdPcAcaExists bool
 param customDomain string
 
 @description('Resource ID of the managed certificate')
-param managedCertId string
+param managedCertId string?
 
 // Container registry for storing container images
 module containerRegistry 'br/public:avm/res/container-registry/registry:0.1.1' = {
@@ -139,11 +139,11 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
         ]
       }
     ]
-    customDomains: empty(customDomain) ? [] : [
+    customDomains: [
       {
         name: customDomain
         certificateId: managedCertId
-        bindingType: 'SniEnabled'
+        bindingType: managedCertId == null ? 'Disabled' : 'SniEnabled'
       }
     ]
     managedIdentities:{
@@ -178,3 +178,6 @@ output containerAppsEnvironmentResourceId string = containerAppsEnvironment.outp
 
 @description('Container App name')
 output containerAppName string = devProdPcAca.outputs.name
+
+@description('Container App hostname')
+output containerAppHostname string = devProdPcAca.outputs.fqdn
