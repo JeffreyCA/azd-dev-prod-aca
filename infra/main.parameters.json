@@ -15,7 +15,7 @@
         "value": "${SERVICE_DEV_PROD_ACA_RESOURCE_EXISTS=false}"
       },
       "customDomain": {
-        "value": "${CUSTOM_DOMAIN_NAME}"
+        "value": "${CUSTOM_DOMAIN}"
       },
       "managedCertId": {
         "value": "${MANAGED_CERTIFICATE_ID}"

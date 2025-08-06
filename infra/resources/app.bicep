@@ -97,6 +97,15 @@ module devProdAcaFetchLatestImage './modules/fetch-container-image.bicep' = {
   }
 }
 
+// Fetch domain verification ID
+module fetchDomainVerificationId './modules/fetch-domain-verification-id.bicep' = {
+  name: 'devProdAca-fetch-domain-verification-id'
+  params: {
+    name: 'dev-prod-aca'
+  }
+  dependsOn: [devProdAca]
+}
+
 // Container app with managed identity integration
 module devProdAca 'br/public:avm/res/app/container-app:0.18.1' = {
   name: 'devProdAca'
@@ -139,7 +148,7 @@ module devProdAca 'br/public:avm/res/app/container-app:0.18.1' = {
         ]
       }
     ]
-    customDomains: empty(customDomain) ? [] : [
+    customDomains: !devProdAcaExists || empty(customDomain) ? [] : [
       {
         name: customDomain
         certificateId: managedCertId
@@ -181,3 +190,6 @@ output containerAppName string = devProdAca.outputs.name
 
 @description('Container App hostname')
 output containerAppHostname string = devProdAca.outputs.fqdn
+
+@description('Custom domain verification ID for the container app')
+output customDomainVerificationId string = fetchDomainVerificationId.outputs.domainVerificationId

@@ -122,4 +122,7 @@ module app './resources/app.bicep' = {
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = app.outputs.containerRegistryEndpoint
 output CONTAINER_APP_ENVIRONMENT_ID string = app.outputs.containerAppsEnvironmentResourceId
 output CONTAINER_APP_HOSTNAME string = app.outputs.containerAppHostname
+
+output CUSTOM_DOMAIN_VERIFICATION_ID string = app.outputs.customDomainVerificationId
 output CUSTOM_DOMAIN string = customDomain
+output CUSTOM_DOMAIN_CONFIGURED bool = devProdAcaExists

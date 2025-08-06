@@ -12,9 +12,10 @@ infra:
 workflows:
   up:
    steps:
-    - azd: provision
-    - azd: provision cert-layer
-    - azd: provision
+    - azd: provision # Provision the main application resources
+    - azd: provision # Trigger hook to set TXT record
+    - azd: provision cert-layer # Trigger hook to set A/CNAME record
+    - azd: provision # Bind ACA custom domain to cert
     - azd: deploy
 hooks:
   preprovision:
