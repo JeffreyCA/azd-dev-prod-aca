@@ -42,11 +42,11 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-var abbrs = loadJsonContent('./abbreviations.json')
+var abbrs = loadJsonContent('../abbreviations.json')
 var resourceToken = uniqueString(subscription().id, rg.id, location)
 
 // Deploy network infrastructure only for production environments
-module network './resources/network.bicep' = if (envType == 'prod') {
+module network '../resources/network.bicep' = if (envType == 'prod') {
   scope: rg
   name: 'networkDeployment'
   params: {
@@ -58,7 +58,7 @@ module network './resources/network.bicep' = if (envType == 'prod') {
 }
 
 // Monitor application with Azure Monitor
-module monitoring './resources/monitoring.bicep' = {
+module monitoring '../resources/monitoring.bicep' = {
   scope: rg
   name: 'monitoringDeployment'
   params: {
@@ -80,7 +80,7 @@ module appIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.
 }
 
 // Shared services including storage account with environment-specific connectivity
-module shared './resources/shared.bicep' = {
+module shared '../resources/shared.bicep' = {
   scope: rg
   name: 'sharedDeployment'
   params: {
@@ -96,7 +96,7 @@ module shared './resources/shared.bicep' = {
 }
 
 // Application hosting infrastructure
-module app './resources/app.bicep' = {
+module app '../resources/app.bicep' = {
   scope: rg
   name: 'appDeployment'
   params: {

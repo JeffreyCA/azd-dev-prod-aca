@@ -7,15 +7,17 @@ services:
     host: containerapp
 infra:
   layers:
+  - name: base-layer
+    path: ./infra/base-layer
   - name: cert-layer
     path: ./infra/cert-layer
 workflows:
   up:
    steps:
-    - azd: provision # Provision the main application resources
-    - azd: provision # Trigger hook to set TXT record
+    - azd: provision base-layer # Provision the main application resources
+    - azd: provision base-layer # Trigger hook to set TXT record
     - azd: provision cert-layer # Trigger hook to set A/CNAME record
-    - azd: provision # Bind ACA custom domain to cert
+    - azd: provision base-layer # Bind ACA custom domain to cert
     - azd: deploy
 hooks:
   preprovision:
