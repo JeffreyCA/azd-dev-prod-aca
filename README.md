@@ -1,13 +1,54 @@
-# Azure Container Apps + Storage: Dev→Prod
+## Example workflows
 
-To set up custom domains manually after provisioning:
+### Just deploy
 
-1. `azd up` - when prompted, leave `customDomain` and `managedCertId` empty.
-2. Navigate to the Azure Portal.
-3. Go to the Container App resource.
-4. Under "Settings", select "Custom domains".
-5. Click on "Add custom domain" and follow the prompts to configure your domain.
-    See [Azure documentation](https://learn.microsoft.com/en-us/azure/container-apps/custom-domains-managed-certificates?pivots=azure-portal) for more details.
-6. `azd env set CUSTOM_DOMAIN_NAME <your_custom_domain_name>` - set the custom domain name in your environment.
-7. `azd env set MANAGED_CERT_ID <your_managed_certificate_id>` (`/subscriptions/.../resourceGroups/.../providers/Microsoft.App/managedEnvironments/.../managedCertificates/<cert-name>`) - set the managed certificate resource ID in your environment.
-8. This is needed to prevent the custom domain configuration from getting cleared on future provisions.
+1. `azd provision`
+2. `azd deploy svc`
+  - This does a package (build), pushes to ACR, then creates an ACA revision
+  - The image is `dev-prod-aca/svc` (defined in azure.yaml)
+  - The tag is `latest` (defined in azure.yaml)
+
+### Separate package, publish, deploy
+
+1. `azd provision`
+2. `azd package svc` - Should print out "Target Image: dev-prod-aca/svc:latest"
+3. `azd publish svc --from-package dev-prod-aca/svc:latest`
+  - This pushes the previously built image to ACR (from Step 2)
+4. `azd deploy svc --from-package dev-prod-aca/svc:latest`
+  - Does not push to ACR again
+  - Only creates a new ACA revision using previously pushed image (from Step 3)
+
+### Separate publish, deploy
+
+1. `azd provision`
+2. `azd publish svc --from-package dev-prod-aca/svc:latest`
+  - This does a package (build) and pushes to ACR.
+  - The image is `dev-prod-aca/svc` (defined in azure.yaml)
+  - The tag is `latest` (defined in azure.yaml)
+3. `azd deploy svc --from-package dev-prod-aca/svc:latest`
+  - Does not push to ACR again
+  - Only creates a new ACA revision using previously pushed image (from Step 3)
+
+### Separate publish (custom image tag), deploy
+
+1. `azd provision`
+2. `azd publish svc --tag dev`
+  - This does a package (build) and pushes to ACR.
+  - The image is `dev-prod-aca/svc` (defined in azure.yaml)
+  - The tag is `dev` (overrides value in azure.yaml)
+  - Should print the full image name: `<acr-name>.azurecr.io/dev-prod-aca/svc:dev`
+3. `azd deploy svc --from-package dev-prod-aca/svc:dev` or `azd deploy svc --from-package <acr-name>.azurecr.io/dev-prod-aca/svc:dev`
+  - Does not push to ACR again
+  - Only creates a new ACA revision using previously pushed image (from Step 3)
+
+### Separate publish (custom image name), deploy
+
+1. `azd provision`
+2. `azd publish svc --image dev-prod-aca/svc-2`
+  - This does a package (build) and pushes to ACR.
+  - The image is `dev-prod-aca/svc-2` (overrides value in azure.yaml)
+  - The tag is `latest` (defined in azure.yaml)
+  - Should print the full image name: `<acr-name>.azurecr.io/dev-prod-aca/svc-2:latest`
+3. `azd deploy svc --from-package dev-prod-aca/svc-2:latest` or `azd deploy svc --from-package <acr-name>.azurecr.io/dev-prod-aca/svc-2:latest`
+  - Does not push to ACR again
+  - Only creates a new ACA revision using previously pushed image (from Step 3)

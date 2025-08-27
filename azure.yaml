@@ -1,8 +1,39 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 name: dev-prod-aca
 services:
-  dev-prod-aca:
+  svc:
     project: .
     host: containerapp
     language: python
     apiVersion: '2025-02-02-preview'
+    docker:
+      path: ./Dockerfile
+      context: .
+
+      # `azd publish svc --image my/repo` overrides this
+      # If not specified, defaults to '{appName}/{serviceName}-{environmentName}'
+      image: 'dev-prod-aca/svc' 
+
+      # `azd publish svc --tag mytag` overrides this
+      # If not specified, defaults to 'azd-deploy-{unix time (seconds)}'
+      tag: 'latest'       
+
+      # Uncomment to enable remote builds      
+      # remoteBuild: true
+hooks:
+  prepublish: 
+    - run: echo "This is a prepublish hook"
+      shell: sh
+      interactive: true
+  postpublish: 
+    - run: echo "This is a postpublish hook"
+      shell: sh
+      interactive: true
+  # predeploy: 
+  #   - run: echo "This is a predeploy hook"
+  #     shell: sh
+  #     interactive: true
+  # postdeploy: 
+  #   - run: echo "This is a postdeploy hook"
+  #     shell: sh
+  #     interactive: true

@@ -31,13 +31,7 @@ param tags object = {}
 param envType string = 'dev'
 
 @description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool
-
-@description('Custom domain name for the container app')
-param customDomain string
-
-@description('Resource ID of the managed certificate')
-param managedCertId string
+param acaExists bool
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = uniqueString(subscription().id, resourceGroup().id, location)
@@ -105,9 +99,7 @@ module app './app.bicep' = {
     appIdentityPrincipalId: appIdentity.outputs.principalId
     storageAccountName: shared.outputs.storageAccountName
     storageAccountBlobEndpoint: shared.outputs.storageAccountBlobEndpoint
-    devProdPcAcaExists: devProdPcAcaExists
-    customDomain: customDomain
-    managedCertId: managedCertId
+    acaExists: acaExists
   }
 }
 

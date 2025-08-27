@@ -48,13 +48,7 @@ param storageAccountName string
 param storageAccountBlobEndpoint string
 
 @description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool
-
-@description('Custom domain name for the container app')
-param customDomain string
-
-@description('Resource ID of the managed certificate')
-param managedCertId string
+param acaExists bool
 
 // Container registry for storing container images
 module containerRegistry 'br/public:avm/res/container-registry/registry:0.1.1' = {
@@ -89,19 +83,19 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.4.5
 }
 
 // Fetch existing container image if app already exists
-module devProdPcAcaFetchLatestImage './modules/fetch-container-image.bicep' = {
-  name: 'devProdPcAca-fetch-image'
+module acaFetchLatestImage './modules/fetch-container-image.bicep' = {
+  name: 'svc-fetch-image'
   params: {
-    exists: devProdPcAcaExists
-    name: 'dev-prod-aca'
+    exists: acaExists
+    name: 'svc'
   }
 }
 
 // Container app with managed identity integration
-module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
-  name: 'devProdPcAca'
+module aca 'br/public:avm/res/app/container-app:0.18.1' = {
+  name: 'svc'
   params: {
-    name: 'dev-prod-aca'
+    name: 'svc'
     ingressTargetPort: 5000
     scaleSettings: {
       minReplicas: 1
@@ -109,7 +103,7 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
     }
     containers: [
       {
-        image: devProdPcAcaFetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+        image: acaFetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
         name: 'main'
         resources: {
           cpu: json('0.5')
@@ -139,13 +133,6 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
         ]
       }
     ]
-    customDomains: empty(customDomain) ? [] : [
-      {
-        name: customDomain
-        certificateId: managedCertId
-        bindingType: 'SniEnabled'
-      }
-    ]
     managedIdentities:{
       systemAssigned: false
       userAssignedResourceIds: [appIdentityResourceId]
@@ -158,7 +145,7 @@ module devProdPcAca 'br/public:avm/res/app/container-app:0.18.1' = {
     ]
     environmentResourceId: containerAppsEnvironment.outputs.resourceId
     location: location
-    tags: union(tags, { 'azd-service-name': 'dev-prod-aca' })
+    tags: union(tags, { 'azd-service-name': 'svc' })
   }
 }
 
@@ -168,7 +155,7 @@ param logAnalyticsWorkspaceResourceId string
 
 // Outputs for use by other modules
 @description('Container App resource ID')
-output containerAppResourceId string = devProdPcAca.outputs.resourceId
+output containerAppResourceId string = aca.outputs.resourceId
 
 @description('Container Registry endpoint')
 output containerRegistryEndpoint string = containerRegistry.outputs.loginServer
@@ -177,4 +164,4 @@ output containerRegistryEndpoint string = containerRegistry.outputs.loginServer
 output containerAppsEnvironmentResourceId string = containerAppsEnvironment.outputs.resourceId
 
 @description('Container App name')
-output containerAppName string = devProdPcAca.outputs.name
+output containerAppName string = aca.outputs.name

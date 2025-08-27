@@ -14,13 +14,7 @@ param location string
 param envType string = 'dev'
 
 @description('Flag to indicate if the container app already exists')
-param devProdPcAcaExists bool = false
-
-@description('Custom domain name for the container app')
-param customDomain string
-
-@description('Resource ID of the managed certificate')
-param managedCertId string
+param acaExists bool = false
 
 // The principal parameters are available for role assignments if needed in the future
 // Currently, the application uses managed identity for secure access
@@ -49,9 +43,7 @@ module resources 'resources.bicep' = {
     location: location
     tags: tags
     envType: envType
-    devProdPcAcaExists: devProdPcAcaExists
-    customDomain: customDomain
-    managedCertId: managedCertId
+    acaExists: acaExists
   }
 }
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = resources.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT
